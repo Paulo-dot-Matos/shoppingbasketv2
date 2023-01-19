@@ -1,5 +1,10 @@
 package com.interview.shoppingbasket;
 
-public class Promotion {
-    // Not yet implemented
+import lombok.Data;
+
+@Data
+public abstract class Promotion {
+	private String productCode;
+	private boolean active;
+	public abstract double calculateAfterPromotionPrice (BasketItem item, double price);
 }

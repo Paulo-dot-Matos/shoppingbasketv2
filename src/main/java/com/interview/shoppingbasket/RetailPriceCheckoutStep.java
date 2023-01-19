@@ -1,5 +1,8 @@
 package com.interview.shoppingbasket;
 
+import java.util.List;
+import java.util.Optional;
+
 public class RetailPriceCheckoutStep implements CheckoutStep {
     private PricingService pricingService;
     private double retailTotal;
@@ -17,16 +20,25 @@ public class RetailPriceCheckoutStep implements CheckoutStep {
             int quantity = basketItem.getQuantity();
             double price = pricingService.getPrice(basketItem.getProductCode());
             basketItem.setProductRetailPrice(price);
-            retailTotal += quantity*price;
+            Optional<Promotion> promotion = findPromotion(checkoutContext.getPromotions(), basketItem);
+            if(promotion.isPresent()) {
+            	retailTotal += applyPromotion(promotion.get(), basketItem, price);
+            } else {
+            	retailTotal += quantity*price;
+            }
+            
+            
         }
 
         checkoutContext.setRetailPriceTotal(retailTotal);
     }
 
     public double applyPromotion(Promotion promotion, BasketItem item, double price) {
-        /*
-         * Implement applyPromotion method
-         */
-        return retailTotal;
+    	double promotionPrice = promotion.calculateAfterPromotionPrice(item, price);	
+        return promotionPrice;
+    }
+    
+    private Optional<Promotion> findPromotion(List<Promotion> promotions,BasketItem basketItem) {
+    	return promotions.stream().filter(promotion-> promotion.getProductCode().equalsIgnoreCase(basketItem.getProductCode())).findFirst();
     }
 }
